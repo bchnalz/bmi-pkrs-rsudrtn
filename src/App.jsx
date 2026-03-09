@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const CATEGORY_CONFIG = {
   Kurus: {
@@ -100,6 +100,10 @@ function App() {
   const [age, setAge] = useState('25')
   const [errors, setErrors] = useState({})
   const [result, setResult] = useState(null)
+  const [isResultVisible, setIsResultVisible] = useState(false)
+  const [animatedBmi, setAnimatedBmi] = useState(0)
+  const hideResultTimeoutRef = useRef(null)
+  const bmiAnimationFrameRef = useRef(null)
 
   const bmiProgress = useMemo(() => {
     if (!result) return 0
@@ -146,18 +150,76 @@ function App() {
     const roundedBmi = Number(bmi.toFixed(1))
     const category = classifyBMI(roundedBmi)
 
+    if (hideResultTimeoutRef.current) {
+      clearTimeout(hideResultTimeoutRef.current)
+      hideResultTimeoutRef.current = null
+    }
+
     setResult({
       bmi: roundedBmi,
       category,
       gender,
       age: Number(age),
     })
+    setIsResultVisible(false)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setIsResultVisible(true))
+    })
   }
 
   const resetCalculation = () => {
-    setResult(null)
+    setIsResultVisible(false)
+    setAnimatedBmi(0)
+    hideResultTimeoutRef.current = setTimeout(() => {
+      setResult(null)
+      hideResultTimeoutRef.current = null
+    }, 400)
     setErrors({})
   }
+
+  useEffect(() => {
+    return () => {
+      if (hideResultTimeoutRef.current) {
+        clearTimeout(hideResultTimeoutRef.current)
+      }
+      if (bmiAnimationFrameRef.current) {
+        cancelAnimationFrame(bmiAnimationFrameRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!result || !isResultVisible) return
+
+    const target = result.bmi
+    const duration = 700
+    const start = performance.now()
+    setAnimatedBmi(0)
+
+    const animate = (timestamp) => {
+      const elapsed = timestamp - start
+      const progress = clamp(elapsed / duration, 0, 1)
+      const easedProgress = 1 - (1 - progress) * (1 - progress)
+      const value = Number((target * easedProgress).toFixed(1))
+      setAnimatedBmi(value)
+
+      if (progress < 1) {
+        bmiAnimationFrameRef.current = requestAnimationFrame(animate)
+      } else {
+        setAnimatedBmi(target)
+        bmiAnimationFrameRef.current = null
+      }
+    }
+
+    bmiAnimationFrameRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (bmiAnimationFrameRef.current) {
+        cancelAnimationFrame(bmiAnimationFrameRef.current)
+        bmiAnimationFrameRef.current = null
+      }
+    }
+  }, [result, isResultVisible])
 
   return (
     <main className="min-h-screen bg-[#F7F9FC] px-3 py-6 text-[#1A2E44]">
@@ -170,6 +232,67 @@ function App() {
             </div>
           </div>
         </header>
+
+        {result ? (
+          <section
+            className={`overflow-hidden rounded-2xl bg-white p-5 shadow-sm transition-all duration-400 ${
+              isResultVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+            }`}
+            aria-hidden={!result}
+          >
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-slate-500">Hasil BMI Anda</p>
+                <p className={`text-5xl font-extrabold ${CATEGORY_CONFIG[result.category].colorClass}`}>
+                  {animatedBmi.toFixed(1)}
+                </p>
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-sm font-bold ${CATEGORY_CONFIG[result.category].badgeClass}`}
+                >
+                  {result.category}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex h-3 overflow-hidden rounded-full">
+                  <div className="w-[23.21%] bg-sky-400" />
+                  <div className="w-[15.72%] bg-emerald-400" />
+                  <div className="w-[16.08%] bg-amber-400" />
+                  <div className="flex-1 bg-rose-400" />
+                </div>
+                <div className="relative h-4">
+                  <div className="h-1 rounded-full bg-slate-200" />
+                  <div
+                    className="absolute top-0 h-1 rounded-full bg-[#1A2E44] transition-all duration-700"
+                    style={{ width: `${bmiProgress}%` }}
+                  />
+                  <div
+                    className="absolute -top-1 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-[#1A2E44] shadow-sm transition-all duration-700"
+                    style={{ left: `${bmiProgress}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] font-semibold text-slate-500">
+                  <span>Kurus &lt;18.5</span>
+                  <span>Normal 18.5-22.9</span>
+                  <span>Gemuk 23-27.4</span>
+                  <span>Obesitas &ge;27.5</span>
+                </div>
+              </div>
+
+              <p className="rounded-xl bg-slate-50 p-3 text-sm leading-relaxed text-slate-700">
+                {CATEGORY_CONFIG[result.category].tip}
+              </p>
+
+              <button
+                type="button"
+                onClick={resetCalculation}
+                className="min-h-12 w-full rounded-full border border-slate-200 bg-white px-4 text-sm font-bold text-[#1A2E44] active:scale-[0.99]"
+              >
+                Hitung Ulang
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -188,9 +311,7 @@ function App() {
                       type="button"
                       onClick={() => setGender(option)}
                       className={`min-h-12 rounded-xl px-3 text-sm font-bold transition ${
-                        active
-                          ? activeClass
-                          : 'bg-transparent text-slate-600'
+                        active ? activeClass : 'bg-transparent text-slate-600'
                       }`}
                     >
                       {option}
@@ -253,67 +374,6 @@ function App() {
           </form>
         </section>
 
-        <section
-          className={`overflow-hidden rounded-2xl bg-white p-5 shadow-sm transition-all duration-500 ${
-            result ? 'max-h-[420px] translate-y-0 opacity-100' : 'max-h-0 translate-y-2 p-0 opacity-0'
-          }`}
-          aria-hidden={!result}
-        >
-          {result ? (
-            <div className="space-y-4">
-              <div className="text-center">
-                <p className="text-sm text-slate-500">Hasil BMI Anda</p>
-                <p className={`text-5xl font-extrabold ${CATEGORY_CONFIG[result.category].colorClass}`}>
-                  {result.bmi}
-                </p>
-                <span
-                  className={`inline-flex rounded-full px-3 py-1 text-sm font-bold ${CATEGORY_CONFIG[result.category].badgeClass}`}
-                >
-                  {result.category}
-                </span>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex h-3 overflow-hidden rounded-full">
-                  <div className="w-[23.21%] bg-sky-400" />
-                  <div className="w-[15.72%] bg-emerald-400" />
-                  <div className="w-[16.08%] bg-amber-400" />
-                  <div className="flex-1 bg-rose-400" />
-                </div>
-                <div className="relative h-4">
-                  <div className="h-1 rounded-full bg-slate-200" />
-                  <div
-                    className="absolute top-0 h-1 rounded-full bg-[#1A2E44] transition-all duration-700"
-                    style={{ width: `${bmiProgress}%` }}
-                  />
-                  <div
-                    className="absolute -top-1 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-[#1A2E44] shadow-sm transition-all duration-700"
-                    style={{ left: `${bmiProgress}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-[10px] font-semibold text-slate-500">
-                  <span>Kurus &lt;18.5</span>
-                  <span>Normal 18.5-22.9</span>
-                  <span>Gemuk 23-27.4</span>
-                  <span>Obesitas &ge;27.5</span>
-                </div>
-              </div>
-
-              <p className="rounded-xl bg-slate-50 p-3 text-sm leading-relaxed text-slate-700">
-                {CATEGORY_CONFIG[result.category].tip}
-              </p>
-
-              <button
-                type="button"
-                onClick={resetCalculation}
-                className="min-h-12 w-full rounded-full border border-slate-200 bg-white px-4 text-sm font-bold text-[#1A2E44] active:scale-[0.99]"
-              >
-                Hitung Ulang
-              </button>
-            </div>
-          ) : null}
-        </section>
-
         <section className="rounded-2xl bg-[#4ECDC4] p-5 text-[#12354d] shadow-sm">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/70 text-xl">
@@ -340,7 +400,6 @@ function App() {
         <footer className="px-2 pb-2 text-center text-xs text-slate-500">
           <p className="font-semibold">© Instalasi PKRS RSUD RTN Sidoarjo</p>
           <p>Hasil BMI bersifat informatif. Konsultasikan kondisi Anda dengan tenaga medis.</p>
-          <p>developed by bchnalz</p>
         </footer>
       </div>
     </main>
