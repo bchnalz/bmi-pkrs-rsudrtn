@@ -1,3 +1,0 @@
-﻿Build mobile-first BMI calculator for PKRS RSUD RTN Sidoarjo.
-
-Implement React + Tailwind single-page UX with Indonesian validation, animated BMI result card, WHO-Asian category logic, and Instagram consultation CTA.
