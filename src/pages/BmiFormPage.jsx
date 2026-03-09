@@ -30,7 +30,33 @@ function BmiFormPage() {
   const handleNumberChange = (rawValue) => {
     const digitsOnly = rawValue.replace(/\D/g, '')
     const normalizedLocal = digitsOnly.startsWith('0') ? digitsOnly.slice(1) : digitsOnly
-    setNumber(normalizedLocal)
+    const limitedNumber = normalizedLocal.slice(0, 12)
+    setNumber(limitedNumber)
+  }
+
+  const smoothScrollToTop = () => {
+    const startY = window.scrollY
+    if (startY <= 0) return
+
+    const duration = 500
+    const startTime = performance.now()
+
+    const step = (timestamp) => {
+      const elapsed = timestamp - startTime
+      const progress = clamp(elapsed / duration, 0, 1)
+      const easedProgress = 1 - (1 - progress) * (1 - progress)
+      const nextY = startY * (1 - easedProgress)
+
+      window.scrollTo(0, nextY)
+
+      if (progress < 1) {
+        requestAnimationFrame(step)
+      } else {
+        window.scrollTo(0, 0)
+      }
+    }
+
+    requestAnimationFrame(step)
   }
 
   const validate = () => {
@@ -51,8 +77,8 @@ function BmiFormPage() {
 
     if (!number.trim()) {
       nextErrors.number = 'Nomor WhatsApp wajib diisi.'
-    } else if (!/^62\d{8,15}$/.test(normalizedPhoneNumber)) {
-      nextErrors.number = 'Isi nomor setelah 62, contoh 8123456789.'
+    } else if (!/^62\d{8,12}$/.test(normalizedPhoneNumber)) {
+      nextErrors.number = 'Nomor WhatsApp harus 8-12 digit setelah 62.'
     }
 
     if (!weight || Number.isNaN(weightNum)) {
@@ -136,6 +162,7 @@ function BmiFormPage() {
     setAnimatedBmi(0)
     setSubmitStatus({ type: 'success', message: 'Data berhasil disimpan.' })
     setIsResultVisible(false)
+    smoothScrollToTop()
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setIsResultVisible(true))
     })
@@ -260,6 +287,11 @@ function BmiFormPage() {
               <p className="rounded-xl bg-slate-50 p-3 text-sm leading-relaxed text-slate-700">
                 {CATEGORY_CONFIG[result.category].tip}
               </p>
+              {submitStatus.type === 'success' && submitStatus.message ? (
+                <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">
+                  {submitStatus.message}
+                </p>
+              ) : null}
 
               <button
                 type="button"
@@ -318,6 +350,7 @@ function BmiFormPage() {
                   id="number"
                   type="text"
                   inputMode="numeric"
+                  maxLength={12}
                   value={number}
                   onChange={(event) => handleNumberChange(event.target.value)}
                   className="h-12 w-full border-0 bg-transparent text-base font-semibold text-[#1A2E44] focus:outline-none"
@@ -396,13 +429,9 @@ function BmiFormPage() {
               {errors.age ? <p className="text-xs text-rose-500">{errors.age}</p> : null}
             </div>
 
-            {submitStatus.message ? (
+            {submitStatus.type === 'error' && submitStatus.message ? (
               <p
-                className={`rounded-xl p-3 text-sm ${
-                  submitStatus.type === 'error'
-                    ? 'bg-rose-50 text-rose-700'
-                    : 'bg-emerald-50 text-emerald-700'
-                }`}
+                className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700"
               >
                 {submitStatus.message}
               </p>

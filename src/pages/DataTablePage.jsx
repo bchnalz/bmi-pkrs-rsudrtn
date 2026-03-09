@@ -13,6 +13,8 @@ function DataTablePage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [deletingId, setDeletingId] = useState(null)
+  const [pendingDeleteRow, setPendingDeleteRow] = useState(null)
   const navigate = useNavigate()
 
   const canFetch = useMemo(() => isSupabaseConfigured && Boolean(supabase), [])
@@ -27,6 +29,8 @@ function DataTablePage() {
       Instansi: row.instansi ?? '',
       Nomor: row.phone_number ?? '',
       Gender: row.gender ?? '',
+      'Berat (kg)': row.weight_kg ?? '',
+      'Tinggi (cm)': row.height_cm ?? '',
       Usia: row.age ?? '',
       BMI: row.bmi ?? '',
       Kategori: row.category ?? '',
@@ -54,7 +58,7 @@ function DataTablePage() {
       while (true) {
         const { data, error: queryError } = await supabase
           .from('bmi_submissions')
-          .select('id,name,instansi,phone_number,gender,age,bmi,category,created_at')
+          .select('id,name,instansi,phone_number,gender,weight_kg,height_cm,age,bmi,category,created_at')
           .order('created_at', { ascending: false })
           .range(from, from + pageSize - 1)
 
@@ -88,6 +92,32 @@ function DataTablePage() {
   const handleLogout = () => {
     logout()
     navigate('/login', { replace: true })
+  }
+
+  const requestDeleteRow = (row) => {
+    setPendingDeleteRow(row)
+  }
+
+  const handleDeleteRow = async () => {
+    const id = pendingDeleteRow?.id
+    if (!canFetch || !id) {
+      return
+    }
+
+    setError('')
+    setDeletingId(id)
+
+    const { error: deleteError } = await supabase.from('bmi_submissions').delete().eq('id', id)
+
+    if (deleteError) {
+      setError(`Gagal menghapus data: ${deleteError.message}`)
+      setDeletingId(null)
+      return
+    }
+
+    setRows((prevRows) => prevRows.filter((row) => row.id !== id))
+    setDeletingId(null)
+    setPendingDeleteRow(null)
   }
 
   return (
@@ -150,8 +180,12 @@ function DataTablePage() {
                     <th className="px-3 py-3">Nama</th>
                     <th className="px-3 py-3">Instansi</th>
                     <th className="px-3 py-3">Nomor</th>
+                    <th className="px-3 py-3">Berat (kg)</th>
+                    <th className="px-3 py-3">Tinggi (cm)</th>
+                    <th className="px-3 py-3">Usia</th>
                     <th className="px-3 py-3">BMI</th>
                     <th className="px-3 py-3">Kategori</th>
+                    <th className="px-3 py-3">Tanggal</th>
                     <th className="px-3 py-3">Aksi</th>
                   </tr>
                 </thead>
@@ -161,17 +195,43 @@ function DataTablePage() {
                       <td className="px-3 py-3 font-semibold">{row.name}</td>
                       <td className="px-3 py-3">{row.instansi}</td>
                       <td className="px-3 py-3">{row.phone_number}</td>
+                      <td className="px-3 py-3">{row.weight_kg}</td>
+                      <td className="px-3 py-3">{row.height_cm}</td>
+                      <td className="px-3 py-3">{row.age}</td>
                       <td className="px-3 py-3">{row.bmi}</td>
                       <td className="px-3 py-3">{row.category}</td>
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        {row.created_at ? new Date(row.created_at).toLocaleString('id-ID') : '-'}
+                      </td>
                       <td className="px-3 py-3">
-                        <a
-                          href={buildWhatsAppUrl(row.name, row.phone_number)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-full bg-emerald-500 px-3 py-2 text-xs font-bold text-white"
-                        >
-                          Chat WhatsApp
-                        </a>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={buildWhatsAppUrl(row.name, row.phone_number)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-full bg-emerald-500 px-3 py-2 text-xs font-bold text-white"
+                          >
+                            Chat WhatsApp
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => requestDeleteRow(row)}
+                            disabled={deletingId === row.id}
+                            aria-label={`Hapus data ${row.name}`}
+                            title="Hapus data"
+                            className="rounded-full border border-rose-200 p-2 text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            >
+                              <path d="M9.75 3.75A1.5 1.5 0 0 0 8.25 5.25v.75H5.5a.75.75 0 0 0 0 1.5h.568l.813 11.37A2.25 2.25 0 0 0 9.124 21h5.752a2.25 2.25 0 0 0 2.243-2.13l.813-11.37h.568a.75.75 0 0 0 0-1.5h-2.75v-.75a1.5 1.5 0 0 0-1.5-1.5h-4.5Zm4.5 2.25h-4.5v-.75h4.5v.75Zm-3 4.5a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0v-6Zm3 0a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0v-6Z" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -181,6 +241,36 @@ function DataTablePage() {
           ) : null}
         </section>
       </div>
+
+      {pendingDeleteRow ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-lg">
+            <h2 className="text-lg font-bold">Konfirmasi Hapus Data</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Hapus data <span className="font-semibold">{pendingDeleteRow.name}</span>? Tindakan ini tidak
+              bisa dibatalkan.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPendingDeleteRow(null)}
+                disabled={deletingId === pendingDeleteRow.id}
+                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteRow}
+                disabled={deletingId === pendingDeleteRow.id}
+                className="rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deletingId === pendingDeleteRow.id ? 'Menghapus...' : 'Ya, Hapus'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   )
 }
