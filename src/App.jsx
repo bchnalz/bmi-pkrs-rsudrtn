@@ -75,7 +75,7 @@ function NumberInputWithStepper({
           max={max}
           step={step}
           onChange={(event) => onChange(event.target.value)}
-          className="h-12 w-full border-0 px-3 text-center text-base font-semibold text-[#1A2E44] focus:outline-none"
+          className="no-spinner h-12 w-full border-0 px-3 text-center text-base font-semibold text-[#1A2E44] focus:outline-none"
           placeholder={`Masukkan ${label.toLowerCase()}`}
         />
         <div className="pr-2 text-sm text-slate-500">{unit}</div>
@@ -163,10 +163,7 @@ function App() {
     <main className="min-h-screen bg-[#F7F9FC] px-3 py-6 text-[#1A2E44]">
       <div className="mx-auto w-full max-w-[430px] space-y-4">
         <header className="rounded-2xl bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFE66D] text-2xl">
-              ⚖️
-            </div>
+          <div className="flex items-center justify-center text-center">
             <div>
               <h1 className="text-2xl font-extrabold">Kalkulator BMI</h1>
               <p className="text-sm text-slate-500">Instalasi PKRS - RSUD RTN Sidoarjo</p>
