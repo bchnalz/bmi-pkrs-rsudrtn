@@ -2,11 +2,13 @@
 
 ## Features
 
+- Landing menu page at `/` to access available health tools and future app modules
 - Form BMI now collects `name`, `instansi`, and WhatsApp `number` (Indonesia format `62...`)
 - Result data is saved to Supabase table `bmi_submissions`
 - Admin login route at `/login` (custom single user)
 - Stored data table at `/data`
 - Each row includes direct WhatsApp chat link with Indonesian prefilled warm greeting
+- Food calorie estimator at `/calorie-estimator` with DB-first lookup, OpenAI fallback, editable review, and food log submit
 
 ## Admin Credentials
 
@@ -19,6 +21,10 @@
 2. Fill:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
+   - `OPENAI_API_KEY` (server-side, for Vercel/API function)
+   - `OPENAI_MODEL` (optional, defaults to `gpt-4o-mini`)
+   - `SUPABASE_URL` (server-side for API routes; usually same as VITE_SUPABASE_URL)
+   - `SUPABASE_SERVICE_ROLE_KEY` (server-side; required for food_items and food_logs write operations)
 
 ## Supabase SQL
 

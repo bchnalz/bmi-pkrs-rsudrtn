@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import * as XLSX from 'xlsx'
+import FoodAnalyticsDashboard from '../components/FoodAnalyticsDashboard'
 import { isAuthenticated, logout } from '../lib/auth'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
@@ -148,11 +149,11 @@ function DataTablePage() {
                   <path d="M14.25 2.25H6A2.25 2.25 0 0 0 3.75 4.5v15A2.25 2.25 0 0 0 6 21.75h12A2.25 2.25 0 0 0 20.25 19.5V8.25L14.25 2.25ZM13.5 9V3.75L18.75 9H13.5ZM9.22 11.03l1.53 2.17 1.53-2.17h1.86l-2.45 3.46L14.25 18h-1.88l-1.62-2.31L9.12 18H7.25l2.54-3.56-2.43-3.4h1.86Z" />
                 </svg>
               </button>
-              <Link
-                to="/"
-                className="rounded-full border border-slate-200 px-3 py-2 text-xs font-bold"
-              >
+              <Link to="/bmi" className="rounded-full border border-slate-200 px-3 py-2 text-xs font-bold">
                 Form BMI
+              </Link>
+              <Link to="/" className="rounded-full border border-slate-200 px-3 py-2 text-xs font-bold">
+                Menu
               </Link>
               <button
                 type="button"
@@ -240,6 +241,8 @@ function DataTablePage() {
             </div>
           ) : null}
         </section>
+
+        <FoodAnalyticsDashboard canFetch={canFetch} supabase={supabase} />
       </div>
 
       {pendingDeleteRow ? (

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import NumberInputWithStepper from '../components/NumberInputWithStepper'
 import { CATEGORY_CONFIG, clamp, classifyBMI } from '../lib/bmi'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -225,16 +226,21 @@ function BmiFormPage() {
     <main className="min-h-screen bg-[#F7F9FC] px-3 py-6 text-[#1A2E44]">
       <div className="mx-auto w-full max-w-[430px] space-y-4">
         <header className="rounded-2xl bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <img
-              src="/pkrs-logo.png"
-              alt="Logo PKRS RSUD RTN Sidoarjo"
-              className="h-14 w-14 rounded-xl object-cover"
-            />
-            <div>
-              <h1 className="text-2xl font-extrabold">Kalkulator BMI</h1>
-              <p className="text-sm text-slate-500">Instalasi PKRS - RSUD RTN Sidoarjo</p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <img
+                src="/pkrs-logo.png"
+                alt="Logo PKRS RSUD RTN Sidoarjo"
+                className="h-14 w-14 rounded-xl object-cover"
+              />
+              <div>
+                <h1 className="text-2xl font-extrabold">Kalkulator BMI</h1>
+                <p className="text-sm text-slate-500">Instalasi PKRS - RSUD RTN Sidoarjo</p>
+              </div>
             </div>
+            <Link to="/" className="rounded-full border border-slate-200 px-3 py-2 text-xs font-bold">
+              Menu
+            </Link>
           </div>
         </header>
 

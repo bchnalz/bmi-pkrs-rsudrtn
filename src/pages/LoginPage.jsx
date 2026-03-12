@@ -72,10 +72,16 @@ function LoginPage() {
         </section>
 
         <Link
-          to="/"
+          to="/bmi"
           className="block rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
         >
           Kembali ke Form BMI
+        </Link>
+        <Link
+          to="/"
+          className="block rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
+        >
+          Buka Menu Aplikasi
         </Link>
       </div>
     </main>
