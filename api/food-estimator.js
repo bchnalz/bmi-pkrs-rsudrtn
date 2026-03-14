@@ -1,5 +1,6 @@
 import {
   analyzeFoodEstimate,
+  NON_FOOD_ERROR_MESSAGE,
   toClientSafeEstimatorErrorMessage,
   validateImagePayload,
 } from '../server/foodEstimator.js'
@@ -45,6 +46,10 @@ export default async function handler(req, res) {
     })
     return res.status(200).json(estimatedNutrition)
   } catch (error) {
+    if (error?.message === NON_FOOD_ERROR_MESSAGE) {
+      return res.status(400).json({ error: NON_FOOD_ERROR_MESSAGE })
+    }
+
     return res.status(502).json({
       error: toClientSafeEstimatorErrorMessage(error?.message),
     })

@@ -1,71 +1,124 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import BmiCalculatorPanel from '../components/BmiCalculatorPanel'
+import CalorieEstimatorPanel from '../components/CalorieEstimatorPanel'
+import { Button } from '../components/ui/button'
+import { Card, CardContent, CardTitle } from '../components/ui/card'
 
 const appMenus = [
   {
-    name: 'Kalkulator BMI',
-    description: 'Hitung BMI, lihat kategori, dan simpan data pengguna ke Supabase.',
-    to: '/bmi',
-    badge: 'Tersedia',
-    accentClass: 'from-[#FF6B6B] to-[#ff8a65]',
-    icon: '🩺',
+    id: 'bmi',
+    name: 'Hitung Body Mass Index (BMI)',
+    iconSrc: '/bmi-link.png',
   },
   {
-    name: 'Estimasi Kalori Makanan',
-    description: 'Upload atau ambil foto makanan untuk estimasi kalori dan makronutrien.',
-    to: '/calorie-estimator',
-    badge: 'Baru',
-    accentClass: 'from-[#4ECDC4] to-[#45B7D1]',
-    icon: '🍽️',
+    id: 'calorie',
+    name: 'Kalkulator Kalori',
+    iconSrc: '/calorie-link.png',
   },
 ]
 
-function HomePage() {
+function HomePage({ animateOnLoad = false }) {
+  const revealClass = animateOnLoad ? 'home-reveal-active' : ''
+  const [expandedMenuId, setExpandedMenuId] = useState('bmi')
+  const [panelHeights, setPanelHeights] = useState({})
+  const panelContentRefs = useRef({})
+
+  const handleSelectMenu = (menuId) => {
+    setExpandedMenuId(menuId)
+  }
+
+  useEffect(() => {
+    const updatePanelHeights = () => {
+      setPanelHeights((current) => {
+        let hasChanged = false
+        const next = { ...current }
+
+        appMenus.forEach((menu) => {
+          const el = panelContentRefs.current[menu.id]
+          if (!el) return
+          const height = el.scrollHeight
+          if (next[menu.id] !== height) {
+            next[menu.id] = height
+            hasChanged = true
+          }
+        })
+
+        return hasChanged ? next : current
+      })
+    }
+
+    updatePanelHeights()
+
+    const resizeObserver = new ResizeObserver(updatePanelHeights)
+    appMenus.forEach((menu) => {
+      const el = panelContentRefs.current[menu.id]
+      if (el) {
+        resizeObserver.observe(el)
+      }
+    })
+
+    window.addEventListener('resize', updatePanelHeights)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updatePanelHeights)
+    }
+  }, [])
+
   return (
-    <main className="min-h-screen bg-[#F7F9FC] px-3 py-6 text-[#1A2E44]">
-      <div className="mx-auto w-full max-w-[560px] space-y-4">
-        <header className="rounded-2xl bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <img
-              src="/pkrs-logo.png"
-              alt="Logo PKRS RSUD RTN Sidoarjo"
-              className="h-14 w-14 rounded-xl object-cover"
-            />
-            <div>
-              <h1 className="text-2xl font-extrabold">Health Tools</h1>
-              <p className="text-sm text-slate-500">Pilih menu aplikasi yang ingin digunakan.</p>
-            </div>
-          </div>
+    <main
+      className={`flex min-h-dvh items-center bg-[var(--background)] px-4 py-6 text-[var(--foreground)] md:px-8 md:py-8 ${revealClass}`}
+    >
+      <div className="mx-auto w-full max-w-3xl space-y-4">
+        <header className="home-seq text-center" style={{ '--seq-order': 0 }}>
+          <h1 className="text-2xl font-semibold md:text-3xl">NutriCheck Apps</h1>
         </header>
 
-        <section className="space-y-3">
-          {appMenus.map((menu) => (
-            <Link
-              key={menu.to}
-              to={menu.to}
-              className="block rounded-2xl bg-white p-4 shadow-sm transition hover:-translate-y-0.5"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl">
-                    {menu.icon}
+        <section className="space-y-4">
+          {appMenus.map((menu, index) => {
+            const isExpanded = expandedMenuId === menu.id
+            return (
+              <Card
+                key={menu.id}
+                className="home-seq overflow-hidden ring-1 ring-[color:color-mix(in_oklab,var(--foreground)_10%,transparent)]"
+                style={{ '--seq-order': index + 1 }}
+              >
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSelectMenu(menu.id)}
+                  aria-expanded={isExpanded}
+                  className="h-auto w-full rounded-none p-4"
+                >
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-transparent text-2xl">
+                        <img src={menu.iconSrc} alt="" className="h-full w-full bg-transparent object-contain" loading="lazy" />
+                      </div>
+                      <div className="space-y-1">
+                        <CardTitle>{menu.name}</CardTitle>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <h2 className="text-base font-extrabold">{menu.name}</h2>
-                    <p className="text-sm text-slate-600">{menu.description}</p>
-                  </div>
+                </Button>
+                <div
+                  aria-hidden={!isExpanded}
+                  className={`overflow-hidden transition-[max-height] ${
+                    isExpanded ? 'duration-850 ease-[cubic-bezier(0.22,1,0.36,1)]' : 'pointer-events-none duration-420 ease-out'
+                  }`}
+                  style={{ maxHeight: isExpanded ? `${panelHeights[menu.id] ?? 0}px` : '0px' }}
+                >
+                  <CardContent
+                    ref={(el) => {
+                      panelContentRefs.current[menu.id] = el
+                    }}
+                    className="p-3 md:p-4"
+                  >
+                    {menu.id === 'bmi' ? <BmiCalculatorPanel embedded /> : <CalorieEstimatorPanel embedded />}
+                  </CardContent>
                 </div>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                  {menu.badge}
-                </span>
-              </div>
-              <div className={`mt-3 h-1.5 rounded-full bg-linear-to-r ${menu.accentClass}`} />
-            </Link>
-          ))}
-        </section>
-
-        <section className="rounded-2xl bg-white p-4 text-sm text-slate-600 shadow-sm">
-          Ruang ini disiapkan untuk aplikasi tambahan berikutnya. Tambahkan menu baru kapan pun saat
-          fitur baru siap dirilis.
+              </Card>
+            )
+          })}
         </section>
       </div>
     </main>

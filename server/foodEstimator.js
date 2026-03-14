@@ -13,6 +13,7 @@ export const ALLOWED_MIME_TYPES = new Set([
 
 const OPENAI_API_BASE = 'https://api.openai.com/v1'
 const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
+export const NON_FOOD_ERROR_MESSAGE = 'Ini bukan makanan/minuman.'
 const MEAL_TYPE_MAP = {
   Sarapan: 'sarapan',
   'Makan Siang': 'makan siang',
@@ -136,6 +137,10 @@ function sanitizeFoodItems(foodsInput) {
 function normalizeEstimatorResult(raw, source = 'openai') {
   if (!raw || typeof raw !== 'object') {
     throw new Error('Respons AI tidak valid.')
+  }
+
+  if (raw.is_food_or_drink === false) {
+    throw new Error(NON_FOOD_ERROR_MESSAGE)
   }
 
   const foodsInput = Array.isArray(raw.foods) ? raw.foods : []
@@ -309,6 +314,7 @@ Step 4: If confidence below 0.7, still estimate but flag in notes.
 Step 5: Return ONLY valid JSON, no explanation, no markdown.
 
 {
+  "is_food_or_drink": true,
   "foods": [
     {
       "name": "",
@@ -328,7 +334,8 @@ Step 5: Return ONLY valid JSON, no explanation, no markdown.
     "protein_g": 0,
     "fat_g": 0
   },
-  "notes": ""
+  "notes": "",
+  "rejection_reason": ""
 }
 `
 
@@ -347,7 +354,10 @@ Step 5: Return ONLY valid JSON, no explanation, no markdown.
         {
           role: 'user',
           content: [
-            { type: 'text', text: 'Analyze this food photo and return JSON only.' },
+            {
+              type: 'text',
+              text: 'Analyze this food/drink photo and return JSON only. If image is not food or drink, set is_food_or_drink=false, foods=[], total all 0, and fill rejection_reason.',
+            },
             {
               type: 'image_url',
               image_url: {

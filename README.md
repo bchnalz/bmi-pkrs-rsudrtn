@@ -8,7 +8,7 @@
 - Admin login route at `/login` (custom single user)
 - Stored data table at `/data`
 - Each row includes direct WhatsApp chat link with Indonesian prefilled warm greeting
-- Food calorie estimator at `/calorie-estimator` with DB-first lookup, OpenAI fallback, editable review, and food log submit
+- Food calorie estimator available as expandable card in the home menu (`/`) with DB-first lookup, OpenAI fallback, editable review, and food log submit
 
 ## Admin Credentials
 

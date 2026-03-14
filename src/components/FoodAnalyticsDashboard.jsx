@@ -16,7 +16,14 @@ import {
 } from 'recharts'
 
 const ROWS_PER_PAGE = 20
-const CHART_COLORS = ['#4ECDC4', '#45B7D1', '#FF6B6B', '#FFB347', '#8B5CF6', '#34D399']
+const CHART_COLORS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  'var(--chart-6)',
+]
 const MEAL_TYPE_LABELS = {
   sarapan: 'Sarapan',
   'makan siang': 'Makan Siang',
@@ -91,7 +98,11 @@ function extractErrorMessage(error) {
 
 function SortButton({ active, direction, children, onClick }) {
   return (
-    <button type="button" onClick={onClick} className="inline-flex items-center gap-1 font-semibold">
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1 rounded px-1 font-semibold hover:bg-[var(--muted)]/70"
+    >
       <span>{children}</span>
       {active ? <span className="text-[10px]">{direction === 'asc' ? '▲' : '▼'}</span> : null}
     </button>
@@ -278,51 +289,51 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
 
   if (loading) {
     return (
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <p className="text-sm text-slate-500">Memuat analytics makanan...</p>
+      <section className="rounded-xl bg-[var(--card)] p-5 ring-1 ring-[color:color-mix(in_oklab,var(--foreground)_10%,transparent)]">
+        <p className="text-sm text-[var(--muted-foreground)]">Memuat analytics makanan...</p>
       </section>
     )
   }
 
   return (
-    <section className="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
+    <section className="space-y-6 rounded-xl bg-[var(--card)] p-5 ring-1 ring-[color:color-mix(in_oklab,var(--foreground)_10%,transparent)]">
       <header>
-        <h2 className="text-xl font-extrabold">Dashboard Estimasi Makanan</h2>
-        <p className="text-sm text-slate-500">Ringkasan bulan berjalan dan tren 30 hari terakhir</p>
+        <h2 className="text-2xl font-semibold">Dashboard Estimasi Makanan</h2>
+        <p className="text-sm text-[var(--muted-foreground)]">Ringkasan bulan berjalan dan tren 30 hari terakhir</p>
       </header>
 
       {error ? (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">
+        <p className="rounded-xl bg-[var(--warning-surface)] p-3 text-sm text-[var(--warning-foreground)]">
           {extractErrorMessage({ message: error }) || error}
         </p>
       ) : null}
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-500">Total submissions (bulan ini)</p>
+        <div className="rounded-xl border border-[var(--border)] p-4">
+          <p className="text-xs font-semibold text-[var(--muted-foreground)]">Total submissions (bulan ini)</p>
           <p className="mt-2 text-3xl font-extrabold">{overview.totalSubmissions}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-500">Most logged food</p>
+        <div className="rounded-xl border border-[var(--border)] p-4">
+          <p className="text-xs font-semibold text-[var(--muted-foreground)]">Most logged food</p>
           <p className="mt-2 text-lg font-extrabold">{overview.mostLoggedFood?.[0] || '-'}</p>
-          <p className="text-xs text-slate-500">{overview.mostLoggedFood?.[1] ?? 0} kali</p>
+          <p className="text-xs text-[var(--muted-foreground)]">{overview.mostLoggedFood?.[1] ?? 0} kali</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-500">Avg calories / submission</p>
+        <div className="rounded-xl border border-[var(--border)] p-4">
+          <p className="text-xs font-semibold text-[var(--muted-foreground)]">Avg calories / submission</p>
           <p className="mt-2 text-3xl font-extrabold">{overview.averageCalories.toFixed(1)}</p>
-          <p className="text-xs text-slate-500">kkal</p>
+          <p className="text-xs text-[var(--muted-foreground)]">kkal</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-500">AI calls vs DB cache hits</p>
+        <div className="rounded-xl border border-[var(--border)] p-4">
+          <p className="text-xs font-semibold text-[var(--muted-foreground)]">AI calls vs DB cache hits</p>
           <p className="mt-2 text-2xl font-extrabold">
             {overview.aiCalls !== null ? `${overview.aiCalls} : ${overview.cacheHits}` : 'N/A'}
           </p>
-          <p className="text-xs text-slate-500">Bulan ini</p>
+          <p className="text-xs text-[var(--muted-foreground)]">Bulan ini</p>
         </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-xl border border-[var(--border)] p-4">
           <h3 className="text-sm font-bold">Top 10 makanan terpopuler bulan ini</h3>
           <div className="mt-3 h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -331,13 +342,13 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
                 <XAxis dataKey="food" tick={{ fontSize: 10 }} />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="#4ECDC4" />
+                <Bar dataKey="count" fill="var(--chart-1)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-xl border border-[var(--border)] p-4">
           <h3 className="text-sm font-bold">Tren submission per hari (30 hari terakhir)</h3>
           <div className="mt-3 h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -346,13 +357,13 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
                 <XAxis dataKey="label" tick={{ fontSize: 10 }} />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="submissions" stroke="#45B7D1" strokeWidth={2} />
+                <Line type="monotone" dataKey="submissions" stroke="var(--chart-2)" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-xl border border-[var(--border)] p-4">
           <h3 className="text-sm font-bold">Distribusi meal type</h3>
           <div className="mt-3 h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -369,7 +380,7 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-xl border border-[var(--border)] p-4">
           <h3 className="text-sm font-bold">Rata-rata kalori per meal type</h3>
           <div className="mt-3 h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -378,19 +389,19 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
                 <XAxis dataKey="mealType" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="averageCalories" fill="#FFB347" />
+                <Bar dataKey="averageCalories" fill="var(--chart-4)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className="space-y-3 rounded-2xl border border-slate-200 p-4">
+      <div className="space-y-3 rounded-xl border border-[var(--border)] p-4">
         <h3 className="text-sm font-bold">Recent submissions</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-[var(--border)] text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
                 <th className="px-3 py-3">
                   <SortButton
                     active={sortConfig.key === 'submitted_at'}
@@ -449,7 +460,7 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
             </thead>
             <tbody>
               {paginatedRows.map((row) => (
-                <tr key={row.id} className="border-b border-slate-100">
+                <tr key={row.id} className="border-b border-[var(--border)]">
                   <td className="px-3 py-3 whitespace-nowrap">{formatDate(row.submitted_at)}</td>
                   <td className="px-3 py-3 font-semibold">{row.food_name || '-'}</td>
                   <td className="px-3 py-3">{toNumber(row.estimated_grams).toFixed(1)}</td>
@@ -460,7 +471,7 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
               ))}
               {paginatedRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-3 py-4 text-center text-slate-500">
+                  <td colSpan={6} className="px-3 py-4 text-center text-[var(--muted-foreground)]">
                     Belum ada submission makanan.
                   </td>
                 </tr>
@@ -470,7 +481,7 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[var(--muted-foreground)]">
             Halaman {activePage} dari {totalPages} - {ROWS_PER_PAGE} baris per halaman
           </p>
           <div className="flex gap-2">
@@ -478,7 +489,7 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
               type="button"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={activePage === 1}
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-bold disabled:opacity-50"
+              className="rounded-lg border border-[var(--border)] px-3 py-1 text-xs font-semibold hover:bg-[var(--muted)]/40 disabled:opacity-50"
             >
               Sebelumnya
             </button>
@@ -486,7 +497,7 @@ function FoodAnalyticsDashboard({ canFetch, supabase }) {
               type="button"
               onClick={() => setCurrentPage(Math.min(totalPages, activePage + 1))}
               disabled={activePage === totalPages}
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-bold disabled:opacity-50"
+              className="rounded-lg border border-[var(--border)] px-3 py-1 text-xs font-semibold hover:bg-[var(--muted)]/40 disabled:opacity-50"
             >
               Berikutnya
             </button>

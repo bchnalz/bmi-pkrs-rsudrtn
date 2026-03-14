@@ -1,4 +1,8 @@
 import { clamp } from '../lib/bmi'
+import { motion } from 'framer-motion'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 
 function NumberInputWithStepper({ id, label, value, onChange, min, max, step = 1, unit, error }) {
   const numericValue = Number(value) || 0
@@ -10,41 +14,37 @@ function NumberInputWithStepper({ id, label, value, onChange, min, max, step = 1
 
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block text-sm font-semibold text-[#1A2E44]">
+      <Label htmlFor={id} className="block text-center">
         {label}
-      </label>
-      <div className="flex min-h-12 items-center rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <button
-          type="button"
-          onClick={() => handleAdjust(-step)}
-          className="flex h-12 w-12 items-center justify-center rounded-l-2xl bg-slate-50 text-xl font-bold text-[#1A2E44] active:scale-95"
-          aria-label={`Kurangi ${label}`}
-        >
-          -
-        </button>
-        <input
-          id={id}
-          type="number"
-          inputMode="decimal"
-          value={value}
-          min={min}
-          max={max}
-          step={step}
-          onChange={(event) => onChange(event.target.value)}
-          className="no-spinner h-12 w-full border-0 px-3 text-center text-base font-semibold text-[#1A2E44] focus:outline-none"
-          placeholder={`Masukkan ${label.toLowerCase()}`}
-        />
-        <div className="pr-2 text-sm text-slate-500">{unit}</div>
-        <button
-          type="button"
-          onClick={() => handleAdjust(step)}
-          className="flex h-12 w-12 items-center justify-center rounded-r-2xl bg-slate-50 text-xl font-bold text-[#1A2E44] active:scale-95"
-          aria-label={`Tambah ${label}`}
-        >
-          +
-        </button>
+      </Label>
+      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
+        <motion.div whileTap={{ scale: 0.9, y: 1 }}>
+          <Button type="button" variant="outline" size="icon" onClick={() => handleAdjust(-step)} aria-label={`Kurangi ${label}`}>
+            -
+          </Button>
+        </motion.div>
+        <div className="flex min-h-12 items-center rounded-xl px-1">
+          <Input
+            id={id}
+            type="number"
+            inputMode="numeric"
+            value={value}
+            min={min}
+            max={max}
+            step={step}
+            onChange={(event) => onChange(event.target.value)}
+            className="no-spinner h-12 border-[color:color-mix(in_oklab,var(--foreground)_22%,transparent)] bg-[var(--card)] text-center text-base font-medium md:text-sm"
+            placeholder={`Masukkan ${label.toLowerCase()}`}
+          />
+          {unit ? <div className="pl-1 text-sm text-[var(--muted-foreground)]">{unit}</div> : null}
+        </div>
+        <motion.div whileTap={{ scale: 0.84, y: 1, boxShadow: '0 0 0 4px rgba(59,130,246,0.22)' }}>
+          <Button type="button" variant="outline" size="icon" onClick={() => handleAdjust(step)} aria-label={`Tambah ${label}`}>
+            +
+          </Button>
+        </motion.div>
       </div>
-      {error ? <p className="text-xs text-rose-500">{error}</p> : null}
+      {error ? <p className="text-xs text-rose-600">{error}</p> : null}
     </div>
   )
 }

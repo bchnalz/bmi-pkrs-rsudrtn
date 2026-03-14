@@ -122,13 +122,13 @@ function DataTablePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F9FC] px-3 py-6 text-[#1A2E44]">
-      <div className="mx-auto w-full max-w-6xl space-y-4">
-        <header className="sticky top-3 z-20 rounded-2xl bg-white p-5 shadow-sm">
+    <main className="min-h-dvh bg-[var(--background)] px-4 py-6 text-[var(--foreground)] md:px-8 md:py-8">
+      <div className="mx-auto w-full max-w-7xl space-y-6">
+        <header className="sticky top-3 z-20 rounded-xl bg-[var(--card)] p-5 ring-1 ring-[color:color-mix(in_oklab,var(--foreground)_10%,transparent)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-extrabold">Data BMI Tersimpan</h1>
-              <p className="text-sm text-slate-500">Kelola dan hubungi pengguna melalui WhatsApp</p>
+              <h1 className="text-2xl font-semibold">Data BMI Tersimpan</h1>
+              <p className="text-sm text-[var(--muted-foreground)]">Kelola dan hubungi pengguna melalui WhatsApp</p>
             </div>
             <div className="flex gap-2">
               <button
@@ -137,7 +137,7 @@ function DataTablePage() {
                 disabled={rows.length === 0}
                 aria-label="Export ke Excel"
                 title="Export ke Excel"
-                className="rounded-full border border-slate-200 p-2 text-[#1A2E44] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-[var(--border)] p-2 text-[var(--foreground)] hover:bg-[var(--muted)]/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -149,16 +149,22 @@ function DataTablePage() {
                   <path d="M14.25 2.25H6A2.25 2.25 0 0 0 3.75 4.5v15A2.25 2.25 0 0 0 6 21.75h12A2.25 2.25 0 0 0 20.25 19.5V8.25L14.25 2.25ZM13.5 9V3.75L18.75 9H13.5ZM9.22 11.03l1.53 2.17 1.53-2.17h1.86l-2.45 3.46L14.25 18h-1.88l-1.62-2.31L9.12 18H7.25l2.54-3.56-2.43-3.4h1.86Z" />
                 </svg>
               </button>
-              <Link to="/bmi" className="rounded-full border border-slate-200 px-3 py-2 text-xs font-bold">
-                Form BMI
+              <Link
+                to="/"
+                className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold hover:bg-[var(--muted)]/40"
+              >
+                Menu Utama
               </Link>
-              <Link to="/" className="rounded-full border border-slate-200 px-3 py-2 text-xs font-bold">
+              <Link
+                to="/"
+                className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-semibold hover:bg-[var(--muted)]/40"
+              >
                 Menu
               </Link>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="rounded-full bg-[#1A2E44] px-3 py-2 text-xs font-bold text-white"
+                className="rounded-lg bg-[var(--primary)] px-3 py-2 text-xs font-semibold text-[var(--primary-foreground)] hover:brightness-105"
               >
                 Logout
               </button>
@@ -166,18 +172,22 @@ function DataTablePage() {
           </div>
         </header>
 
-        <section className="rounded-2xl bg-white p-5 shadow-sm">
-          {loading ? <p className="text-sm text-slate-500">Memuat data...</p> : null}
-          {!loading && error ? <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</p> : null}
+        <section className="rounded-xl bg-[var(--card)] p-5 ring-1 ring-[color:color-mix(in_oklab,var(--foreground)_10%,transparent)]">
+          {loading ? <p className="text-sm text-[var(--muted-foreground)]">Memuat data...</p> : null}
+          {!loading && error ? (
+            <p className="rounded-xl bg-[var(--danger-surface)] p-3 text-sm text-[var(--danger-foreground)]">
+              {error}
+            </p>
+          ) : null}
           {!loading && !error && rows.length === 0 ? (
-            <p className="text-sm text-slate-500">Belum ada data tersimpan.</p>
+            <p className="text-sm text-[var(--muted-foreground)]">Belum ada data tersimpan.</p>
           ) : null}
 
           {!loading && !error && rows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-[var(--border)] text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
                     <th className="px-3 py-3">Nama</th>
                     <th className="px-3 py-3">Instansi</th>
                     <th className="px-3 py-3">Nomor</th>
@@ -192,7 +202,7 @@ function DataTablePage() {
                 </thead>
                 <tbody>
                   {rows.map((row) => (
-                    <tr key={row.id} className="border-b border-slate-100">
+                    <tr key={row.id} className="border-b border-[var(--border)]">
                       <td className="px-3 py-3 font-semibold">{row.name}</td>
                       <td className="px-3 py-3">{row.instansi}</td>
                       <td className="px-3 py-3">{row.phone_number}</td>
@@ -210,7 +220,7 @@ function DataTablePage() {
                             href={buildWhatsAppUrl(row.name, row.phone_number)}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded-full bg-emerald-500 px-3 py-2 text-xs font-bold text-white"
+                            className="rounded-lg bg-[var(--success)] px-3 py-2 text-xs font-semibold text-white hover:brightness-105"
                           >
                             Chat WhatsApp
                           </a>
@@ -220,7 +230,7 @@ function DataTablePage() {
                             disabled={deletingId === row.id}
                             aria-label={`Hapus data ${row.name}`}
                             title="Hapus data"
-                            className="rounded-full border border-rose-200 p-2 text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-lg border border-[var(--danger)]/35 p-2 text-[var(--danger)] hover:bg-[var(--danger-surface)] disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -246,10 +256,10 @@ function DataTablePage() {
       </div>
 
       {pendingDeleteRow ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-lg">
-            <h2 className="text-lg font-bold">Konfirmasi Hapus Data</h2>
-            <p className="mt-2 text-sm text-slate-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--foreground)]/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-[var(--card)] p-5 shadow-lg ring-1 ring-[color:color-mix(in_oklab,var(--foreground)_10%,transparent)]">
+            <h2 className="text-lg font-semibold">Konfirmasi Hapus Data</h2>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
               Hapus data <span className="font-semibold">{pendingDeleteRow.name}</span>? Tindakan ini tidak
               bisa dibatalkan.
             </p>
@@ -258,7 +268,7 @@ function DataTablePage() {
                 type="button"
                 onClick={() => setPendingDeleteRow(null)}
                 disabled={deletingId === pendingDeleteRow.id}
-                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-semibold hover:bg-[var(--muted)]/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Batal
               </button>
@@ -266,7 +276,7 @@ function DataTablePage() {
                 type="button"
                 onClick={handleDeleteRow}
                 disabled={deletingId === pendingDeleteRow.id}
-                className="rounded-full bg-rose-600 px-4 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-[var(--danger)] px-4 py-2 text-xs font-semibold text-white hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {deletingId === pendingDeleteRow.id ? 'Menghapus...' : 'Ya, Hapus'}
               </button>
