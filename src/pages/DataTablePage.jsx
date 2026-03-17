@@ -205,7 +205,7 @@ function DataTablePage() {
                     <tr key={row.id} className="border-b border-[var(--border)]">
                       <td className="px-3 py-3 font-semibold">{row.name}</td>
                       <td className="px-3 py-3">{row.instansi}</td>
-                      <td className="px-3 py-3">{row.phone_number}</td>
+                      <td className="px-3 py-3">{row.phone_number || '-'}</td>
                       <td className="px-3 py-3">{row.weight_kg}</td>
                       <td className="px-3 py-3">{row.height_cm}</td>
                       <td className="px-3 py-3">{row.age}</td>
@@ -216,14 +216,20 @@ function DataTablePage() {
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
-                          <a
-                            href={buildWhatsAppUrl(row.name, row.phone_number)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rounded-lg bg-[var(--success)] px-3 py-2 text-xs font-semibold text-white hover:brightness-105"
-                          >
-                            Chat WhatsApp
-                          </a>
+                          {row.phone_number ? (
+                            <a
+                              href={buildWhatsAppUrl(row.name, row.phone_number)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded-lg bg-[var(--success)] px-3 py-2 text-xs font-semibold text-white hover:brightness-105"
+                            >
+                              Chat WhatsApp
+                            </a>
+                          ) : (
+                            <span className="rounded-lg bg-[var(--muted)] px-3 py-2 text-xs font-semibold text-[var(--muted-foreground)]">
+                              No WhatsApp
+                            </span>
+                          )}
                           <button
                             type="button"
                             onClick={() => requestDeleteRow(row)}

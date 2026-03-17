@@ -3,7 +3,7 @@
 ## Features
 
 - Landing menu page at `/` to access available health tools and future app modules
-- Form BMI now collects `name`, `instansi`, and WhatsApp `number` (Indonesia format `62...`)
+- Form BMI now collects `name` and `instansi`; WhatsApp number is optional (can be empty)
 - Result data is saved to Supabase table `bmi_submissions`
 - Admin login route at `/login` (custom single user)
 - Stored data table at `/data`

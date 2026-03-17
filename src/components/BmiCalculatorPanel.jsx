@@ -15,7 +15,6 @@ function BmiCalculatorPanel({ embedded = false }) {
     { label: 'Wanita', value: 'Wanita', submitValue: 'Perempuan' },
   ]
   const [name, setName] = useState('')
-  const [number, setNumber] = useState('')
   const [gender, setGender] = useState('Pria')
   const [weight, setWeight] = useState('60')
   const [height, setHeight] = useState('165')
@@ -34,13 +33,6 @@ function BmiCalculatorPanel({ embedded = false }) {
     const maxBmi = 40
     return ((clamp(result.bmi, minBmi, maxBmi) - minBmi) / (maxBmi - minBmi)) * 100
   }, [result])
-
-  const handleNumberChange = (rawValue) => {
-    const digitsOnly = rawValue.replace(/\D/g, '')
-    const normalizedLocal = digitsOnly.startsWith('0') ? digitsOnly.slice(1) : digitsOnly
-    const limitedNumber = normalizedLocal.slice(0, 12)
-    setNumber(limitedNumber)
-  }
 
   const handleLimitedDigitNumberChange = (setter, maxDigits) => (rawValue) => {
     const digitsOnly = rawValue.replace(/\D/g, '')
@@ -84,14 +76,6 @@ function BmiCalculatorPanel({ embedded = false }) {
 
     if (!name.trim()) {
       nextErrors.name = 'Nama wajib diisi.'
-    }
-
-    const normalizedPhoneNumber = `62${number.trim()}`
-
-    if (!number.trim()) {
-      nextErrors.number = 'Nomor WhatsApp wajib diisi.'
-    } else if (!/^62\d{8,12}$/.test(normalizedPhoneNumber)) {
-      nextErrors.number = 'Nomor WhatsApp harus 8-12 digit setelah 62.'
     }
 
     if (!weight || Number.isNaN(weightNum)) {
@@ -141,7 +125,7 @@ function BmiCalculatorPanel({ embedded = false }) {
     const payload = {
       name: name.trim(),
       instansi: '-',
-      phone_number: `62${number.trim()}`,
+      phone_number: null,
       gender: selectedGenderOption?.submitValue ?? gender,
       weight_kg: weightNum,
       height_cm: Number(height),
@@ -154,9 +138,15 @@ function BmiCalculatorPanel({ embedded = false }) {
     setIsSaving(false)
 
     if (error) {
+      const isPhoneNotNullConstraintError =
+        String(error.message || '').toLowerCase().includes('phone_number') &&
+        String(error.message || '').toLowerCase().includes('not-null')
+
       setSubmitStatus({
         type: 'error',
-        message: `Gagal menyimpan data: ${error.message}`,
+        message: isPhoneNotNullConstraintError
+          ? 'Gagal menyimpan data: kolom phone_number di database masih wajib isi. Jalankan migrasi Supabase agar phone_number boleh kosong.'
+          : `Gagal menyimpan data: ${error.message}`,
       })
       return
     }
@@ -266,9 +256,10 @@ function BmiCalculatorPanel({ embedded = false }) {
 
           <div className="space-y-2">
             <div className="flex h-3 overflow-hidden rounded-full">
-              <div className="w-[23.21%] bg-sky-400" />
-              <div className="w-[15.72%] bg-emerald-400" />
-              <div className="w-[16.08%] bg-amber-400" />
+              <div className="w-[17.86%] bg-cyan-400" />
+              <div className="w-[5%] bg-sky-400" />
+              <div className="w-[23.21%] bg-emerald-400" />
+              <div className="w-[6.79%] bg-amber-400" />
               <div className="flex-1 bg-rose-400" />
             </div>
             <div className="relative h-4">
@@ -283,10 +274,11 @@ function BmiCalculatorPanel({ embedded = false }) {
               />
             </div>
             <div className="flex justify-between text-[10px] font-medium text-[var(--muted-foreground)]">
-              <span>Kurus &lt;18.5</span>
-              <span>Normal 18.5-22.9</span>
-              <span>Gemuk 23-27.4</span>
-              <span>Obesitas &ge;27.5</span>
+              <span>BB Kurang &lt;17</span>
+              <span>Kurus 17.0-18.4</span>
+              <span>Normal 18.5-25.0</span>
+              <span>BB Berlebih 25.1-27.0</span>
+              <span>Obesitas &gt;27.0</span>
             </div>
           </div>
 
@@ -419,29 +411,6 @@ function BmiCalculatorPanel({ embedded = false }) {
               </div>
               {errors.height ? <p className="text-xs text-rose-500">{errors.height}</p> : null}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="number" className="block text-center">
-              Nomor WhatsApp
-              <span className="mt-1 block text-[11px] italic font-normal text-[var(--muted-foreground)]">
-                (Untuk kami berikan informasi kesehatan di kemudian hari)
-              </span>
-            </Label>
-            <div className="flex min-h-12 items-center rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 ring-1 ring-[color:color-mix(in_oklab,var(--foreground)_10%,transparent)]">
-              <span className="mr-2 text-base font-semibold text-[var(--muted-foreground)]">62</span>
-              <Input
-                id="number"
-                type="text"
-                inputMode="numeric"
-                maxLength={12}
-                value={number}
-                onChange={(event) => handleNumberChange(event.target.value)}
-                className="h-12 border-0 bg-transparent text-base font-medium md:text-sm"
-                placeholder="Contoh 8123456789"
-              />
-            </div>
-            {errors.number ? <p className="text-xs text-rose-500">{errors.number}</p> : null}
           </div>
 
           {submitStatus.type === 'error' && submitStatus.message ? (
